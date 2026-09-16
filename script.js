@@ -19,7 +19,9 @@ const bagBackdrop = document.querySelector('.bag-backdrop');
 const bagClose = document.querySelector('.bag-close');
 const zellePanel = document.querySelector('.zelle-panel');
 const zelleProductName = document.querySelector('#zelle-product-name');
-const shippingQuotePanel = document.querySelector('#shipping-quote');
+const shippingQuotePanel = document.querySelector('#shipping-quote');const shippingStreetInput = document.querySelector('#shipping-street');
+const shippingCityInput = document.querySelector('#shipping-city');
+const shippingStateInput = document.querySelector('#shipping-state');
 const shippingZipInput = document.querySelector('#shipping-zip');
 const shippingRatesButton = document.querySelector('#get-shipping-rates');
 const shippingStatus = document.querySelector('#shipping-status');
@@ -402,3 +404,50 @@ document.querySelector('#contact-form').addEventListener('submit', event => {
 
 loadCatalog();
 renderBag();
+
+
+// Full-address live-rate override: Shippo requires a complete U.S. delivery address.
+(() => {
+  const originalButton = document.querySelector('#get-shipping-rates');
+  if (!originalButton) return;
+  const liveRatesButton = originalButton.cloneNode(true);
+  originalButton.replaceWith(liveRatesButton);
+
+  const getLiveRates = async () => {
+    const checkoutApi = window.SAKHI_MOHINI_CHECKOUT_API;
+    const productName = opener?.dataset.productName;
+    const street1 = document.querySelector('#shipping-street')?.value.trim() || '';
+    const city = document.querySelector('#shipping-city')?.value.trim() || '';
+    const state = document.querySelector('#shipping-state')?.value.trim().toUpperCase() || '';
+    const zip = document.querySelector('#shipping-zip')?.value.trim() || '';
+    if (!street1 || !city || !/^[A-Z]{2}$/.test(state) || !/^\d{5}(?:-\d{4})?$/.test(zip)) {
+      shippingStatus.textContent = 'Enter your street address, city, two-letter state, and valid U.S. ZIP code.';
+      return;
+    }
+    if (!checkoutApi || !productName) {
+      shippingStatus.textContent = 'Delivery options are temporarily unavailable.';
+      return;
+    }
+    liveRatesButton.disabled = true;
+    liveRatesButton.textContent = 'Finding options…';
+    shippingStatus.textContent = 'Checking live USPS and UPS delivery options…';
+    shippingOptions.replaceChildren();
+    selectedShippingQuote = null;
+    try {
+      const response = await fetch(`${checkoutApi}/shipping-rates`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productName, quantity: 1, destination: { street1, city, state, zip } })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Live carrier rates are temporarily unavailable.');
+      renderShippingOptions(data.rates || []);
+    } catch (error) {
+      shippingStatus.textContent = error.message || 'Live carrier rates are temporarily unavailable.';
+    } finally {
+      liveRatesButton.disabled = false;
+      liveRatesButton.textContent = 'Show options';
+    }
+  };
+  liveRatesButton.addEventListener('click', getLiveRates);
+})();
