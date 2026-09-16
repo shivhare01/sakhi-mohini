@@ -434,14 +434,14 @@ renderBag();
     shippingOptions.replaceChildren();
     selectedShippingQuote = null;
     try {
-      const response = await fetch(`${checkoutApi}/shipping-rates`, {
+      const response = await fetch(checkoutApi.replace(/\/create-checkout$/, '/shipping-rates'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ productName, quantity: 1, destination: { street1, city, state, zip } })
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Live carrier rates are temporarily unavailable.');
-      renderShippingOptions(data.rates || []);
+      showShippingOptions(data.rates || []);
     } catch (error) {
       shippingStatus.textContent = error.message || 'Live carrier rates are temporarily unavailable.';
     } finally {
