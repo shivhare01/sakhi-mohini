@@ -2,7 +2,7 @@
   {
     "name": "Rang mirror-work vest ",
     "price": 56.99,
-    "shipping_weight_oz": 5,
+    "shipping_weight_oz": 40,
     "category": "Men's festive vest ",
     "label": "New",
     "image": "/assets/mirror-work-vest.png",
@@ -13,6 +13,7 @@
   {
     "name": "Neel embroidered vest",
     "price": 63.99,
+    "shipping_weight_oz": 60,
     "category": "Men's festive vest",
     "label": "New",
     "image": "/assets/royal-blue-vest.png",
