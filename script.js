@@ -92,10 +92,10 @@ function createProductCard(product) {
   const category = document.createElement('p');
   category.className = 'product-type';
   category.textContent = product.category || 'Celebration edit';
-  const swatches = document.createElement('div');
-  swatches.className = 'swatches';
-  for (let i = 0; i < 3; i += 1) swatches.append(document.createElement('i'));
-  card.append(imageBox, name, price, category, swatches);
+  
+  
+  
+  card.append(imageBox, name, price, category);
   addProductCardInteractions(card);
   return card;
 }
